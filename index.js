@@ -101,13 +101,17 @@ const alaPoint = {
             }) +
             script(
               domReady(
-                mkMap(points, id) +
+                `let curMarkers = []
+                    ` +
+                  mkMap(points, id) +
                   (v
-                    ? `points.forEach(pt=>{
-            L.marker(pt[0]).addTo(map);
+                    ? `
+                    points.forEach(pt=>{
+            const m = L.marker(pt[0]).addTo(map);
+            curMarkers.push(m);
           });`
                     : "") +
-                  `map.on('click',lookup_by_map_click);`
+                  `map.on('click',lookup_by_map_click(map, curMarkers));`
               )
             )
         );

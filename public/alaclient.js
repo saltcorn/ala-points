@@ -17,7 +17,7 @@ async function lookup_by_ala_number(e) {
   }
 }
 
-async function lookup_by_map_click(e) {
+const lookup_by_map_click = (map, curMarkers) => async (e) => {
   const {
     latlng: { lat, lng },
   } = e;
@@ -33,5 +33,11 @@ async function lookup_by_map_click(e) {
       .closest("div.ala-input")
       .find("input[type=hidden]")
       .val(JSON.stringify(aladata[0]));
+    if (curMarkers.length)
+      curMarkers.forEach((m) => {
+        map.removeLayer(m);
+      });
+    const m = L.marker([lat, lng]).addTo(map);
+    curMarkers.push(m);
   }
-}
+};
