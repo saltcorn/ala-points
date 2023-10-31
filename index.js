@@ -30,6 +30,26 @@ const showLatLng = (v) => {
   ).toFixed(4)}° ${xcoord > 0 ? "E" : "W"}`;
 };
 
+const mkMap = (points0, id) => {
+  const points = points0.filter(
+    (p) => typeof p[0][0] === "number" && typeof p[0][1] === "number"
+  );
+  const npts = points.length;
+  const iniloc =
+    npts > 0
+      ? JSON.stringify(points[0][0])
+      : JSON.stringify([-13.8387663, -171.7886927]);
+  console.log(points0);
+  return `var points = ${JSON.stringify(points)};
+var map = L.map('${id}').setView(${iniloc}, 9);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
+console.log(points)
+if(points.length>0) map.fitBounds(points.map(pt=>pt[0]));
+`;
+};
+
 const alaPoint = {
   name: "AlaPoint",
   sql_name: "jsonb",
@@ -54,6 +74,45 @@ const alaPoint = {
             )
           : "",
     },
+    nearestByMapClick: {
+      isEdit: true,
+      configFields: [
+        {
+          name: "height",
+          label: "Height in px",
+          type: "Integer",
+          required: true,
+          default: 300,
+        },
+      ],
+      run: (nm, v, attrs, cls, required, field) => {
+        const id = `map${Math.round(Math.random() * 100000)}`;
+        const points = v ? [[[+v.ycoord, +v.xcoord]]] : []; // [[[-13.8387663, -171.7886927]]];
+        return div(
+          { class: "ala-input" },
+          div({ id, style: `height:${attrs?.height || 300}px;` }) +
+            input({
+              name: text_attr(nm),
+              id: `input${text_attr(nm)}`,
+              type: "hidden",
+              onChange: attrs.onChange,
+              "data-fieldname": text_attr(field.name),
+              value: v ? text_attr(JSON.stringify(v)) : false,
+            }) +
+            script(
+              domReady(
+                mkMap(points, id) +
+                  (v
+                    ? `points.forEach(pt=>{
+            L.marker(pt[0]).addTo(map);
+          });`
+                    : "") +
+                  `map.on('click',lookup_by_map_click);`
+              )
+            )
+        );
+      },
+    },
     searchAlaNumber: {
       isEdit: true,
       run: (nm, v, attrs, cls, required, field) =>
@@ -70,7 +129,7 @@ const alaPoint = {
             {
               class: "btn btn-secondary",
               type: "button",
-              onClick: `lookup_by_ala_number(this, '${nm}')`,
+              onClick: `lookup_by_ala_number(this)`,
             },
             v?.ala_num ? "Find ✓" : "Find"
           ),
@@ -105,6 +164,7 @@ module.exports = {
   sc_plugin_api_version: 1,
   types: [alaPoint],
   plugin_name: "ala-points",
+  dependencies: ["@saltcorn/leaflet-map"],
   headers: [
     {
       script: `/plugins/public/ala-points${
