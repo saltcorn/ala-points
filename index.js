@@ -19,6 +19,7 @@ const {
   nbsp,
   section,
   div,
+  a,
 } = require("@saltcorn/markup/tags");
 
 const showLatLng = (v) => {
@@ -40,6 +41,18 @@ const alaPoint = {
     showLatLng: {
       isEdit: false,
       run: showLatLng,
+    },
+    googleMapsLink: {
+      configFields: [{ label: "Label", name: "label", type: "String" }],
+      run: (v, req, options) =>
+        v
+          ? a(
+              {
+                href: `http://www.google.com/maps/place/${v.ycoord},${v.xcoord}`,
+              },
+              options?.label || "Google Maps Link"
+            )
+          : "",
     },
     searchAlaNumber: {
       isEdit: true,
