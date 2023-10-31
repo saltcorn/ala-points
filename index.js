@@ -39,13 +39,11 @@ const mkMap = (points0, id) => {
     npts > 0
       ? JSON.stringify(points[0][0])
       : JSON.stringify([-13.8387663, -171.7886927]);
-  console.log(points0);
   return `var points = ${JSON.stringify(points)};
 var map = L.map('${id}').setView(${iniloc}, 9);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
-console.log(points)
 if(points.length>0) map.fitBounds(points.map(pt=>pt[0]));
 `;
 };
