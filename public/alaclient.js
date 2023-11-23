@@ -49,25 +49,34 @@ function preventAlaSubmit(event, curMarkers, map) {
 }
 
 let ala_cache = {};
+let ala_fetching;
+let ala_last_fetch;
 
 async function search_by_ala_name(e, curMarkers, map) {
   e.preventDefault();
-
+  const container = $(e.target)
+    .closest("div.ala-input")
+    .find("div.byname-results");
   const val = e.target.value;
   //console.log("ala name", { e, val, curMarkers, map });
   if (!val) return;
+
+  //same query, container open -> ignore
+  if (ala_last_fetch === val && $.trim(container.html())) return;
   let aladata;
   if (ala_cache[val]) aladata = ala_cache[val];
   else {
     const filter = encodeURIComponent(`name ilike '%${val}%'`);
+    if (filter === ala_fetching) return;
+
+    ala_last_fetch = val;
     const url = `http://www.saili.ws/v1/query/ala_samoa?columns=*&filter=${filter}&limit=20`;
+    ala_fetching = filter;
     const response = await fetch(url);
     aladata = await response.json();
+    ala_fetching = null;
   }
   if (aladata?.length) {
-    const container = $(e.target)
-      .closest("div.ala-input")
-      .find("div.byname-results");
     container.empty(); //clear
     for (const alapt of aladata) {
       const newelem = $(
