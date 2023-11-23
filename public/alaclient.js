@@ -20,7 +20,7 @@ const lookup_by_map_click = (map, curMarkers) => async (e) => {
     latlng: { lat, lng },
   } = e;
   //http://www.saili.ws/v1/nearest/ala_samoa/-171.7761%2C-13.84322%2C4326?geom_column=geom&columns=*&limit=1
-
+  //console.log("add point", { lat, lng });
   const url = `http://www.saili.ws/v1/nearest/ala_samoa/${lng}%2C${lat}%2C4326?geom_column=geom&columns=*&limit=1`;
   const response = await fetch(url);
   const aladata = await response.json();
@@ -37,3 +37,42 @@ const lookup_by_map_click = (map, curMarkers) => async (e) => {
     curMarkers.push(m);
   }
 };
+
+function preventAlaSubmit(event, curMarkers, map) {
+  if (event.keyCode == 13) {
+    event.preventDefault();
+    setTimeout(() => {
+      search_by_ala_name(event, curMarkers, map);
+    });
+    return false;
+  }
+}
+
+let last_ala_query_name;
+
+async function search_by_ala_name(e, curMarkers, map) {
+  e.preventDefault();
+
+  const val = e.target.value;
+  //console.log("ala name", { e, val, curMarkers, map });
+  if (!val) return;
+  if (val == last_ala_query_name) return;
+  last_ala_query_name = val;
+  const filter = encodeURIComponent(`name ilike '${val}%'`);
+  const url = `http://www.saili.ws/v1/query/ala_samoa?columns=*&filter=${filter}&limit=5`;
+  const response = await fetch(url);
+  const aladata = await response.json();
+  if (aladata?.length) {
+    //console.log("ala data", aladata[0]);
+    $(e.target)
+      .closest("div.ala-input")
+      .find("input[type=hidden]")
+      .val(JSON.stringify(aladata[0]));
+    if (curMarkers.length)
+      curMarkers.forEach((m) => {
+        map.removeLayer(m);
+      });
+    const m = L.marker([+aladata[0].ycoord, +aladata[0].xcoord]).addTo(map);
+    curMarkers.push(m);
+  }
+}

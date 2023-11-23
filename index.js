@@ -91,36 +91,52 @@ const alaPoint = {
           required: true,
           default: 300,
         },
+        {
+          name: "search_by_name",
+          label: "Search by name",
+          type: "Bool",
+        },
       ],
       run: (nm, v, attrs, cls, required, field) => {
         const id = `map${Math.round(Math.random() * 100000)}`;
         const points = v ? [[[+v.ycoord, +v.xcoord]]] : []; // [[[-13.8387663, -171.7886927]]];
         return div(
           { class: "ala-input" },
-          div({ id, style: `height:${attrs?.height || 300}px;` }) +
+          div({ id, style: `height:${attrs?.height || 300}px;` }),
+          attrs?.search_by_name &&
             input({
-              name: text_attr(nm),
-              id: `input${text_attr(nm)}`,
-              type: "hidden",
-              onChange: attrs.onChange,
-              "data-fieldname": text_attr(field.name),
-              value: v ? text_attr(JSON.stringify(v)) : false,
-            }) +
-            script(
-              domReady(
-                `let curMarkers = []
+              type: "text",
+              class: "w-100 mt-2 byname",
+              placeholder: "Ala number or places",
+            }),
+          input({
+            name: text_attr(nm),
+            id: `input${text_attr(nm)}`,
+            type: "hidden",
+            onChange: attrs.onChange,
+            "data-fieldname": text_attr(field.name),
+            value: v ? text_attr(JSON.stringify(v)) : false,
+          }),
+          script(
+            domReady(
+              `let curMarkers = []
                     ` +
-                  mkMap(points, id) +
-                  (v
-                    ? `
+                mkMap(points, id) +
+                (v
+                  ? `
                     points.forEach(pt=>{
             const m = L.marker(pt[0]).addTo(map);
             curMarkers.push(m);
           });`
-                    : "") +
-                  `map.on('click',lookup_by_map_click(map, curMarkers));`
-              )
+                  : "") +
+                `map.on('click',lookup_by_map_click(map, curMarkers));` +
+                (attrs?.search_by_name &&
+                  `$('#${id}').parent().find('input.byname')
+                  .on('change', (e)=>search_by_ala_name(e, curMarkers, map))
+                  .on('keypress', (e)=>preventAlaSubmit(e, curMarkers, map))
+                  `)
             )
+          )
         );
       },
     },
