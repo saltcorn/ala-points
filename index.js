@@ -106,8 +106,12 @@ const alaPoint = {
           attrs?.search_by_name &&
             input({
               type: "text",
-              class: "w-100 mt-2 byname",
-              placeholder: "Ala number or places",
+              class: "w-100 mt-2 byname form-control",
+              placeholder: "Enter Ala number or places to search..",
+            }),
+          attrs?.search_by_name &&
+            div({
+              class: "w-100 mt-2 byname-results",
             }),
           input({
             name: text_attr(nm),

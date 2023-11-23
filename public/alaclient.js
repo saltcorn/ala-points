@@ -58,21 +58,39 @@ async function search_by_ala_name(e, curMarkers, map) {
   if (!val) return;
   if (val == last_ala_query_name) return;
   last_ala_query_name = val;
-  const filter = encodeURIComponent(`name ilike '${val}%'`);
-  const url = `http://www.saili.ws/v1/query/ala_samoa?columns=*&filter=${filter}&limit=5`;
+  const filter = encodeURIComponent(`name ilike '%${val}%'`);
+  const url = `http://www.saili.ws/v1/query/ala_samoa?columns=*&filter=${filter}&limit=20`;
   const response = await fetch(url);
   const aladata = await response.json();
+  console.log("aladata", url, aladata);
   if (aladata?.length) {
-    //console.log("ala data", aladata[0]);
-    $(e.target)
+    const container = $(e.target)
       .closest("div.ala-input")
-      .find("input[type=hidden]")
-      .val(JSON.stringify(aladata[0]));
-    if (curMarkers.length)
-      curMarkers.forEach((m) => {
-        map.removeLayer(m);
+      .find("div.byname-results");
+    container.empty(); //clear
+    for (const alapt of aladata) {
+      const newelem = $(
+        `<div class="border" style="cursor: pointer;">${alapt.name}<br><small>${
+          alapt.village || ""
+        }</small><small class="float-right">Ala number ${
+          alapt.ala_num
+        }</small></div>`
+      );
+      newelem.on("click", () => {
+        $(e.target)
+          .closest("div.ala-input")
+          .find("input[type=hidden]")
+          .val(JSON.stringify(alapt));
+        if (curMarkers.length)
+          curMarkers.forEach((m) => {
+            map.removeLayer(m);
+          });
+        const m = L.marker([+alapt.ycoord, +alapt.xcoord]).addTo(map);
+        curMarkers.push(m);
+        container.empty(); //clear
       });
-    const m = L.marker([+aladata[0].ycoord, +aladata[0].xcoord]).addTo(map);
-    curMarkers.push(m);
+      container.append(newelem);
+    }
+    //console.log("ala data", aladata[0]);
   }
 }
