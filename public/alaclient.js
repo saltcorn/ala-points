@@ -61,22 +61,47 @@ async function search_by_ala_name(e, curMarkers, map) {
   //console.log("ala name", { e, val, curMarkers, map });
   if (!val) return;
 
+  let isAlaNumber = false;
+
+  if (val.match(/^[0-9]{1,3}-[0-9]{1,3}-[0-9]{1,3}$/)) isAlaNumber = true;
+
   //same query, container open -> ignore
   if (ala_last_fetch === val && $.trim(container.html())) return;
   let aladata;
   if (ala_cache[val]) aladata = ala_cache[val];
   else {
-    const filter = encodeURIComponent(`name ilike '%${val}%'`);
-    if (filter === ala_fetching) return;
-
+    if (val === ala_fetching) return;
     ala_last_fetch = val;
-    const url = `http://www.saili.ws/v1/query/ala_samoa?columns=*&filter=${filter}&limit=20`;
-    ala_fetching = filter;
+    ala_fetching = val;
+
+    let url;
+    if (isAlaNumber) {
+      url = `http://www.saili.ws/v1/query/ala_samoa?columns=*&filter=ala_num%20%3D%20%27${val}%27&limit=1`;
+    } else {
+      const filter = encodeURIComponent(`name ilike '%${val}%'`);
+      url = `http://www.saili.ws/v1/query/ala_samoa?columns=*&filter=${filter}&limit=20`;
+    }
     const response = await fetch(url);
     aladata = await response.json();
     ala_fetching = null;
   }
-  if (aladata?.length) {
+  const set_ala_pt = (alapt) => {
+    $(e.target)
+      .closest("div.ala-input")
+      .find("input[type=hidden]")
+      .val(JSON.stringify(alapt));
+    if (curMarkers.length)
+      curMarkers.forEach((m) => {
+        map.removeLayer(m);
+      });
+    const m = L.marker([+alapt.ycoord, +alapt.xcoord]).addTo(map);
+    curMarkers.push(m);
+    container.empty(); //clear
+    $(e.target).val(alapt.name);
+  };
+  if (aladata?.length === 1) {
+    set_ala_pt(aladata[0]);
+  } else if (aladata?.length) {
     container.empty(); //clear
     for (const alapt of aladata) {
       const newelem = $(
@@ -87,18 +112,7 @@ async function search_by_ala_name(e, curMarkers, map) {
         }</small></div>`
       );
       newelem.on("click", () => {
-        $(e.target)
-          .closest("div.ala-input")
-          .find("input[type=hidden]")
-          .val(JSON.stringify(alapt));
-        if (curMarkers.length)
-          curMarkers.forEach((m) => {
-            map.removeLayer(m);
-          });
-        const m = L.marker([+alapt.ycoord, +alapt.xcoord]).addTo(map);
-        curMarkers.push(m);
-        container.empty(); //clear
-        $(e.target).val(alapt.name);
+        set_ala_pt(alapt);
       });
       container.append(newelem);
     }
