@@ -3,7 +3,7 @@ async function lookup_by_ala_number(e) {
   const ala_num = $(e).closest("div.ala-input").find("input.ala-input").val();
 
   if (!ala_num) return;
-  const url = `http://www.saili.ws/v1/query/ala_samoa?columns=*&filter=ala_num%20%3D%20%27${ala_num}%27&limit=1`;
+  const url = `https://ala.skyeyepacific.com/v1/query/ala_samoa?columns=*&filter=ala_num%20%3D%20%27${ala_num}%27&limit=1`;
   const response = await fetch(url);
   const aladata = await response.json();
   if (aladata?.length) {
@@ -19,9 +19,9 @@ const lookup_by_map_click = (map, curMarkers) => async (e) => {
   const {
     latlng: { lat, lng },
   } = e;
-  //http://www.saili.ws/v1/nearest/ala_samoa/-171.7761%2C-13.84322%2C4326?geom_column=geom&columns=*&limit=1
+  //https://ala.skyeyepacific.com/v1/nearest/ala_samoa/-171.7761%2C-13.84322%2C4326?geom_column=geom&columns=*&limit=1
   //console.log("add point", { lat, lng });
-  const url = `http://www.saili.ws/v1/nearest/ala_samoa/${lng}%2C${lat}%2C4326?geom_column=geom&columns=*&limit=1`;
+  const url = `https://ala.skyeyepacific.com/v1/nearest/ala_samoa/${lng}%2C${lat}%2C4326?geom_column=geom&columns=*&limit=1`;
   const response = await fetch(url);
   const aladata = await response.json();
   if (aladata?.length) {
@@ -76,10 +76,10 @@ async function search_by_ala_name(e, curMarkers, map) {
 
     let url;
     if (isAlaNumber) {
-      url = `http://www.saili.ws/v1/query/ala_samoa?columns=*&filter=ala_num%20%3D%20%27${val}%27&limit=1`;
+      url = `https://ala.skyeyepacific.com/v1/query/ala_samoa?columns=*&filter=ala_num%20%3D%20%27${val}%27&limit=1`;
     } else {
       const filter = encodeURIComponent(`name ilike '%${val}%'`);
-      url = `http://www.saili.ws/v1/query/ala_samoa?columns=*&filter=${filter}&limit=20`;
+      url = `https://ala.skyeyepacific.com/v1/query/ala_samoa?columns=*&filter=${filter}&limit=20`;
     }
     const response = await fetch(url);
     aladata = await response.json();
