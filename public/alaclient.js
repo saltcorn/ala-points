@@ -101,6 +101,7 @@ async function search_by_ala_name(e, curMarkers, map) {
       });
     const m = L.marker([+alapt.ycoord, +alapt.xcoord]).addTo(map);
     curMarkers.push(m);
+    map.panTo(new L.LatLng(+alapt.ycoord, +alapt.xcoord));
     container.empty(); //clear
     $(e.target).val(alapt.name);
     const disp_loc = $(e.target)
