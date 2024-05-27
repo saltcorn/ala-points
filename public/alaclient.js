@@ -85,6 +85,7 @@ async function search_by_ala_name(e, curMarkers, map) {
       const filter = encodeURIComponent(`name ilike '%${val}%'`);
       url = `https://ala.skyeyepacific.com/v1/query/ala_samoa?columns=*&filter=${filter}&limit=20`;
     }
+    container.html(`<i>Loading...</i>`);
     const response = await fetch(url);
     aladata = await response.json();
     ala_fetching = null;
