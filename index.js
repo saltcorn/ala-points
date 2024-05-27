@@ -103,6 +103,7 @@ const alaPoint = {
         return div(
           { class: "ala-input" },
           div({ id, style: `height:${attrs?.height || 300}px;` }),
+          div({ class: "display-ala-location" }),
           attrs?.search_by_name &&
             input({
               type: "text",

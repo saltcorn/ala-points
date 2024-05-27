@@ -35,6 +35,10 @@ const lookup_by_map_click = (map, curMarkers) => async (e) => {
       });
     const m = L.marker([lat, lng]).addTo(map);
     curMarkers.push(m);
+    const disp_loc = $(e.originalEvent.target)
+      .closest("div.ala-input")
+      .find("div.display-ala-location");
+    disp_loc.html(ala_point_to_html(aladata[0]));
   }
 };
 
@@ -98,19 +102,17 @@ async function search_by_ala_name(e, curMarkers, map) {
     curMarkers.push(m);
     container.empty(); //clear
     $(e.target).val(alapt.name);
+    const disp_loc = $(e.target)
+      .closest("div.ala-input")
+      .find("div.display-ala-location");
+    disp_loc.html(ala_point_to_html(alapt));
   };
   if (aladata?.length === 1) {
     set_ala_pt(aladata[0]);
   } else if (aladata?.length) {
     container.empty(); //clear
     for (const alapt of aladata) {
-      const newelem = $(
-        `<div class="border" style="cursor: pointer;">${alapt.name}<br><small>${
-          alapt.village || ""
-        }</small><small class="float-right">Ala number ${
-          alapt.ala_num
-        }</small></div>`
-      );
+      const newelem = $(ala_point_to_html(alapt, true));
       newelem.on("click", () => {
         set_ala_pt(alapt);
       });
@@ -118,4 +120,14 @@ async function search_by_ala_name(e, curMarkers, map) {
     }
     //console.log("ala data", aladata[0]);
   }
+}
+
+function ala_point_to_html(alapt, point) {
+  return `<div class="border p-2" ${point ? 'style="cursor: pointer;"' : ""}>${
+    alapt.name || ""
+  }${
+    alapt.name ? "<br>" : ""
+  }<div class="d-flex justify-content-between"><small>${
+    alapt.village || ""
+  }</small><small>Ala number ${alapt.ala_num}</small></div></div>`;
 }
