@@ -1,6 +1,6 @@
 {
   "name": "@saltcorn/ala-points",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Ala addressing system",
   "main": "index.js",
   "dependencies": {
